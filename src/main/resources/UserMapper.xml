@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mybatis的映射文件
+    namespace:指向Dao层接口,相当于dao层接口的实现类-->
+<mapper namespace="com.lanou.mapper.UserDao">
+    <!--查询语句
+        id:外部访问名称
+        resultType:查询结果集返回的类型-->
+    <select id="findAll" resultType="com.lanou.domain.User">
+        SELECT * FROM TUser
+    </select>
+</mapper>

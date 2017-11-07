@@ -1,0 +1,159 @@
+一、Maven
+作用: 管理项目中的依赖包, 项目中的引入jar包第一次会走在线下载, 以后回先在本地仓库寻找
+1. Maven配置
+    a. 下载Maven的压缩包, 解压到非中文路径的目录下
+    b. 配置Maven的环境变量
+        open .bash_profile: 打开环境变量配置文件
+        source .bash_profile: 让环境变量配置文件立即生效
+        mvn -v: 检查maven的版本
+    c. 添加maven的镜像
+        maven/config/setting.xml mirrors标签, 加入阿里云的镜像
+            <mirror>
+                <id>alimaven</id>
+                <name>aliyun maven</name>
+                <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+                <mirrorOf>central</mirrorOf>
+            </mirror>
+    d. idea中配置maven
+        1) 进入idea的preference配置中找到maven模块
+        2) 配置maven目录, 即mavenDirectory指向maven文件夹所在路径
+        3) 配置maven的setting文件, User settings file指向maven/conf/setting.xml
+
+2. 创建Maven项目
+    a. 在idea建项目时选择的项目类型为
+        maven->create archetype(勾选)->maven-archetype-webapp(推荐)
+        groupId: 该项目所属组, 一般是公司域名, 例如com.lanou
+        artifactId: 项目名称
+        添加自检属性: archetypeCatalog:internal
+    b. 根据webapp模板生成的项目:
+        src
+            main
+                java(手动创建并配置为Source root)
+                    com.huawei...(建自己的代码文件)
+                resource
+                    配置文件
+                webapp
+                    index.jsp
+                    WEB-INF
+                        web.xml
+        target (编译生成文件, 不要动)
+        pom.xml(工程对象模型, maven项目的核心文件)
+    c. pom.xml 管理项目中的依赖文件
+        1)基本标签: (一般情况不要更改)
+            <project>: 最外层标签即根标签, 代表配置的是整个项目
+            <modelVersion>: 当前工程对象模型文件的版本, 不要手动更改, 保持默认值
+            <groupId>: 项目所属组, 与创建项目时输入的值一致
+            <artifactId>: 项目名称, 与创建项目时输入的值一致
+            <packaging>: 打包类型, 一般是war, 即tomcat支持发布的包类型
+            <version>: 当前项目版本, 默认值1.0-SNAPSHOT SNAPSHOT(是快照的意思, 指开发版本)
+            <url>: 通常指向官网
+        2)<properties>: 属性标签, 在该标签中定义一些常量, 常量名为标签名, 常量值为标签值
+                通过${标签名}获取标签值,即常量值
+        3)<dependency>:依赖标签,最重要的标签,一组dependency标签代表了一个jar包的引入
+                 <groupId>: 当前jar包所属组织/公司
+                 <artifactId>: 当前jar包的项目/模块名称
+                 <version>:当前jar包的版本
+                 <scope>:当前jar包所使用的范围
+          备注:maven会自动收缩当前引入的jar包使用时是否有必须引入依赖的jar包,如果有则自动关联引入
+        4)<scope>:范围标签.可选值:test,compile,provide;
+                   test:该jar包只在测试时引入,当正式发布时不引入该jar包
+                   compile:编译引入,默认引入
+                   provide:运行引入
+          备注:不推荐在依赖标签中定义
+        5)<build>:项目在构建过程中的一些配置,例如jdk版本,tomcat配置,以及一些插件的配置等
+        6)<resource>:输入build标签中的resources中的子标签,配置一些资源路径,以及资源路径包含的文件格式等,推荐至少定义源代码路径
+                    <resources>
+                      <resource>
+                        <directory>/main/java</directory>
+                        <includes>
+                          <include>**/*.xml</include>
+                          <include>**/*.properties</include>
+                        </includes>
+                      </resource>
+                    </resources>
+         7)<plugin>插件标签:引入一些插件工具,例如后续要用的mybatis-generator,后续补充
+                  <plugins>
+                       <plugin>
+                         <groupId></groupId>
+                         <artifactId>mybatis-generator-maven-plugin</artifactId>
+                         <version></version>
+                       </plugin>
+                     </plugins>
+
+
+二、Mybatis
+作用:管理,访问数据库的开源项目,从ibatis中衍生出来的
+好处:可直接访问sql语句,通过配置文件管理数据库相关配置(连接参数,打开,关闭数据库)
+    a.由于直接操作sql语句,故效率高;
+    b.相对于jdbc来说数据库访问/打开/关闭都进行了封装,程序员无需关注配置,只需要关注sql语句即可
+    c.相对于hibernate来说sql语句更加灵活,效率更高
+
+使用:
+1.mybatis需要的jar包:mybatis-3.4.5.jar ,mysql-connector-java-5.1.18.jar
+2.使用mybatis需要两个配置文件:
+    1)mybatis的全局配置文件:负责数据库的连接配置,数据库相关参数配置,以及映射文件的引入
+    2)数据库表操作的映射文件:定义各种数据库表的操作;GRUD操作,大量sql语句
+3.映射文件对应的接口类:类似于之前写的dao层中对外提供访问方法的接口类,接口中定义的方法名,方法参数,方法的返回值都与映射文件中定义的sql语句中的id进行匹配
+    备注:由于映射文件中的id要求唯一性,故对应的接口类中是没有方法重载的
+
+详细:
+1.mybatis全局配置文件:
+    a.<configuration>:根标签,代表这是一个配置文件
+    b.<environments>:当前项目中的环境配置,default属性一般配置为development,代表当前属于环境开发
+    c.<environment>某种环境配置,id属性是给当前环境配置的唯一标示,一般写development
+        备注:多环境主要是考虑项目中存在的一种数据库多种测试条件,例如正式发布的数据库配置,
+        测试中的数据库配置;同时还肯有更换数据库的情况,例如原来用mysql,后来变成oracle等
+    d.<transactionManager> :数据库事物配置,一般给type属性配置为JDBC,即使事物采用JDBC管理
+    e.<dataSource>:配置当前数据.type属性配置为pooled代表使用的是dbcp数据库连接池
+        driver:数据库驱动
+        url:数据库地址
+        username:用户名
+        password:密码
+
+        备注:
+
+    f:<mappers>加载映射文件集合
+        <mapper>:加载映射文件的几种方式,配置下列几个属性:
+        a.resource:指向资源目录下的某个映射文件
+                <mapper resource="UserMapper.xml">
+
+        b.class:指向映射文件所对应的接口类,要求映射文件与接口类在同一级目录,且名字相同
+                <mapper resource="com.lanou.mapper.UserMapper">
+        c.url:指向远程仓库地址
+         <mapper url="http://www.xx.com/UserMapper.xml">
+
+2.mybatis映射文件
+一个表对应一个映射文件,该映射文件中包含各种sql语句,即表操作
+a.<mapper>:跟标签,代表是一个映射文件,其中namespace指向映射文件对应的接口类
+b.<insert>:插入标签,执行的是一条插入语句
+1)几个属性:
+id:唯一标示该条sql语句,对应接口中的方法名,命名规则以java方法命名规则匹配
+parameterType:指定该条sql语句返回的类型,插入语句一般省略,对应接口类中的方法的返回值
+2)标签值:对应的sql语句
+    insert into 表名(列名,列名...) values(列值,列值...)
+3)select:查询标签,执行的是一条查询语句
+1)几个属性:同上
+2)标签值:对应的sql语句
+select*from 表名
+select*from where name like '%${value}%'
+select*from where id = #{id}
+${value}:对应条件语句中的字符串拼接,存在sql语句注入的安全问题,慎用,如果对应的值是基本类型,则参数名用value就可以.如果对应其他的则用对应的参数名
+#{id}:对应条件语句中的占位符,即替换语句中?所对应的位置,相对来说比较安全,参数名对应对象的属性名
+
+3.使用
+a.加载mybatis全局配置文件,获得SqlSessionFactory对象,即session工厂类对象
+
+       InputStream is = Resources.getResourceAsStream("mybatis-config.xml");
+
+       SqlSessionFactory  sessionFactory = new SqlSessionFactoryBuilder().build(is);
+b.通过SqlSessionFactory工厂对象获得一次session会话对象
+       SqlSession session = sessionFactory.openSession();
+c.通过SqlSession对象获得映射文件对应的接口类对象
+ UserMapper userMapper = session.getMapper( UserMapper.class);
+d.调用接口类中的方法
+List<User> users = userMapper.findAll();
+e.提交会话以及关闭会话
+session.commit();
+session.close();
+
+备注:如果调用的操是插入操作,则必须调用session.commit()提交,否则新插入的数据不会更新到数据库中.

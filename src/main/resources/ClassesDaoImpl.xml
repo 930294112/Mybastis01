@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lanou.mapper.ClassesDao">
+    <!--插入语句,参数通过#{}的方式去接口类中对应方法的参数名称-->
+    <insert id="addClasses" parameterType="com.lanou.domain.Classes">
+        INSERT INTO TClasses(className,note) VALUES (#{className},#{note})
+    </insert>
+    <!--查询所有-->
+    <select id="findAll" resultType="com.lanou.domain.Classes">
+        SELECT * FROM TClasses
+    </select>
+    <!--根据名字查询-->
+    <select id="findByName" parameterType="java.lang.String" resultType="com.lanou.domain.Classes">
+        SELECT * FROM  TClasses WHERE className LIKE '%${value}%'
+    </select>
+
+    <select id="findByName2" parameterType="com.lanou.domain.Classes" resultType="com.lanou.domain.Classes">
+        SELECT * FROM  TClasses WHERE className LIKE '%${className}%'
+    </select>
+</mapper>
